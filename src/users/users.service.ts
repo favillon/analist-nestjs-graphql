@@ -1,11 +1,13 @@
+import { ArrayContainedBy, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Code, Repository } from 'typeorm';
 import { SignupInput } from '../auth/dto/inputs/signup.input';
 import { User } from './entities/user.entity';
+import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+import { UpdateUserInput } from './dto/update-user.input';
 
 @Injectable()
 export class UsersService {
@@ -29,8 +31,32 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return [];
+  async findAll( roles: ValidRoles[]): Promise<User[]> {
+    try {
+      let users;
+      if (roles.length === 0) {
+        users =  await this.userRepository.find({
+          relations: {
+            lastUpdateBy : true
+          }
+        })
+      } else {
+        users =  await this.userRepository.findBy({
+          roles: ArrayContainedBy(roles),
+        })
+      }
+      return users;
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
+  }
+
+  async findOneById(id:string): Promise<User> {
+    try {
+      return await this.userRepository.findOneByOrFail({id});
+    } catch (error) {
+      throw new NotFoundException(`${id} not found`)
+    }
   }
 
   async findOneByEmail(email: string): Promise<User>  {
@@ -44,9 +70,37 @@ export class UsersService {
     }
   }
 
-  block(id: string): Promise<User>  {
-    throw new Error('Method not implemented.');
-    //return `This action removes a #${id} user`;
+  async update(
+    id: string,
+    updateUserInput: UpdateUserInput,
+    updatedBy: User
+  ): Promise<User>  {
+    try {
+      const userUpdate = await this.userRepository.preload({
+        ...updateUserInput,
+        id
+      });
+
+      if (!userUpdate) {
+        throw new NotFoundException(`User with id ${id} not found`);
+      }
+      userUpdate.lastUpdateBy = updatedBy;
+
+      return await this.userRepository.save(userUpdate);
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
+  }
+
+  async block(id: string, adminUser: User): Promise<User>  {
+    try {
+      const userToBlock = await this.findOneById(id);
+      userToBlock.isActive = false;
+      userToBlock.lastUpdateBy = adminUser;
+      return await this.userRepository.save(userToBlock);
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
   }
 
 

@@ -4,7 +4,7 @@ import { GqlExecutionContext } from "@nestjs/graphql";
 import { ValidRoles } from "../enums/valid-roles.enum";
 import { User } from "src/users/entities/user.entity";
 
-export const currentUser = createParamDecorator(
+export const CurrentUser = createParamDecorator(
     ( roles: ValidRoles[] = [], context:ExecutionContext) =>{
         const ctx= GqlExecutionContext.create(context);
         const user:User = ctx.getContext().req.user

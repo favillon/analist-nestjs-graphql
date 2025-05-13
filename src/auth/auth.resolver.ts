@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LoginInput } from './dto/inputs/login.input';
 import { SignupInput } from './dto/inputs/signup.input';
-import { currentUser } from './decorations/current-user.decoration';
+import { CurrentUser } from './decorations/current-user.decoration';
 import { User } from 'src/users/entities/user.entity';
 import { ValidRoles } from './enums/valid-roles.enum';
 
@@ -34,7 +34,7 @@ export class AuthResolver {
   @Query(() => AuthResponseTypes, { name: 'getValidateToken' })
   @UseGuards( JwtAuthGuard )
   getValidateToken(
-    @currentUser([ ValidRoles.ADMIN]) user: User
+    @CurrentUser([ ValidRoles.ADMIN]) user: User
   ): AuthResponseTypes {
     //console.log({user});
     return this.authService.getValidateToken(user);
