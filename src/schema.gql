@@ -2,20 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Item {
-  """ID field item"""
-  id: ID!
-
-  """name field item"""
-  name: String!
-
-  """quantity field item"""
-  quantity: Float!
-
-  """quantity units field item"""
-  quantityUnits: Int
-}
-
 type User {
   id: ID!
   fullName: String!
@@ -23,6 +9,22 @@ type User {
   roles: [String!]!
   isActive: Boolean!
   lastUpdateBy: User
+  items: [Item!]!
+  itemCount: Int!
+}
+
+type Item {
+  """ID field item"""
+  id: ID!
+
+  """name field item"""
+  name: String!
+
+  """quantity units field item"""
+  quantityUnits: Int
+
+  """user id field item"""
+  user: User
 }
 
 type AuthResponseTypes {
@@ -55,13 +57,11 @@ type Mutation {
 
 input CreateItemInput {
   name: String!
-  quantity: Float!
   quantityUnits: Int!
 }
 
 input UpdateItemInput {
   name: String
-  quantity: Float
   quantityUnits: Int
   id: ID!
 }
