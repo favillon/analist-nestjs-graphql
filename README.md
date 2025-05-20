@@ -47,3 +47,12 @@ localhost:3000/graphql
 
 ## Update User
 ![Update User](./img/update_user.png)
+
+
+## Ejecucion con  build
+
+> docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build
+
+## Solo Ejecucion
+
+> docker-compose -f docker-compose.prod.yml --env-file .env.prod up
